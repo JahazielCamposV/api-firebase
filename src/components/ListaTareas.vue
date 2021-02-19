@@ -1,6 +1,6 @@
 <template>
   <h3>Listado de Tareas</h3>
-  {{tareas}}
+  <!-- {{tareas}} -->
   <table class="table">
       <thead>
           <tr>

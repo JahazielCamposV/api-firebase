@@ -18,11 +18,9 @@ export default createStore({
     },
     set(state, payload){
       state.tareas.push(payload)
-      localStorage.setItem('tareas', JSON.stringify(state.tareas))
     },
     eliminar(state, payload){
       state.tareas = state.tareas.filter(tarea => tarea.id !== payload)
-      localStorage.setItem('tareas', JSON.stringify(state.tareas))
     },
     tarea(state, payload){
       if (!state.tareas.find(tarea => tarea.id === payload)) {
@@ -33,30 +31,63 @@ export default createStore({
     },
     update(state, payload){
       state.tareas = state.tareas.map(tarea => tarea.id === payload.id ? payload : tarea)
-      localStorage.setItem('tareas', JSON.stringify(state.tareas))
       router.push('/')
     }
   },
   actions: {
-    cargarLocalStorage({ commit }) {
-      if (localStorage.getItem('tareas')) {
-        const tareas = JSON.parse(localStorage.getItem('tareas'))
+    async cargarLocalStorage({ commit }) {
+      try {
+        const response = await fetch(`https://vue-udemy-course-81e54-default-rtdb.firebaseio.com/tareas.json`)
+        const dataDB = await response.json()
+        const tareas = []
+        for (let key in dataDB) {
+          tareas.push(dataDB[key])
+        }
         commit('cargar', tareas)
-        return
+      } catch (error) {
+        
       }
-      localStorage.setItem('tareas', JSON.stringify([]))
     },
-    setTareas({commit}, tarea){
+    async setTareas({commit}, tarea){
+      try {
+        const res = await fetch(`https://vue-udemy-course-81e54-default-rtdb.firebaseio.com/tareas/${tarea.id}.json`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type':'application/json'
+          },
+          body: JSON.stringify(tarea)
+        })
+        const dataDB = await res.json()
+        console.log(dataDB)
+      } catch (error) {
+        console.log(error)
+      }
       commit('set', tarea)
     },
-    deleteTarea({commit}, id){
+    async deleteTarea({commit}, id){
+      try {
+        await fetch(`https://vue-udemy-course-81e54-default-rtdb.firebaseio.com/tareas/${id}.json`, {
+          method: 'DELETE'
+        })
+      } catch (error) {
+        console.log(error)
+      }
       commit('eliminar', id)
     },
     setTarea({commit}, id){
       commit('tarea', id)
     },
-    updateTarea({commit}, tarea){
-      commit('update', tarea)
+    async updateTarea({commit}, tarea){
+      try {
+        const res = await fetch(`https://vue-udemy-course-81e54-default-rtdb.firebaseio.com/tareas/${tarea.id}.json`, {
+          method: 'PATCH',
+          body: JSON.stringify(tarea)
+        })
+        const data = await res.json()
+        commit('update', tarea)
+      } catch (error) {
+        console.log(error)
+      }
     }
   },
   modules: {
