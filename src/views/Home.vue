@@ -46,7 +46,7 @@ export default {
 
   },
   methods: {
-    ...mapActions(['setTareas']),
+    ...mapActions(['setTareas', 'cargarLocalStorage']),
     procesarForm(){
       if (this.tarea.nombre.trim() === "") {
         console.log('Campo vacio')  
@@ -66,6 +66,9 @@ export default {
         numero: 0
       }
     }
+  },
+  created(){
+    this.cargarLocalStorage()
   }
 }
 </script>

@@ -13,10 +13,11 @@ export default {
     Navbar
   },
   methods: {
-    ...mapActions(['cargarLocalStorage'])
+    ...mapActions(['cargarLocalStorage', 'getswsat'])
   },
   created(){
-    this.cargarLocalStorage()
+    this.cargarLocalStorage(),
+    this.getswsat()
   }
 }
 </script>
