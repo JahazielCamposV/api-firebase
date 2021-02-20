@@ -39,6 +39,11 @@ export default createStore({
     }
   },
   actions: {
+    cerrarSesion({ commit }){
+      commit('setUser', null)
+      router.push('/ingreso')
+      localStorage.removeItem('user')
+    },
     async ingresoUsuario({commit}, usuario){
       try {
         const res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyA606SdT1mUDfEm6ewbJf7FieeFPyyzCO4`, {
@@ -53,9 +58,10 @@ export default createStore({
         if (userDB.error) {
           return console.log('usuario con error')
         }
-        console.log(userDB)
+        // console.log(userDB)
         commit('setUser', userDB)
         router.push('/')
+        localStorage.setItem('user', JSON.stringify(userDB))
       } catch (error) {
         
       }
@@ -78,11 +84,17 @@ export default createStore({
         }
         commit('setUser', userDB)
         router.push('/ingreso')
+        localStorage.setItem('user', JSON.stringify(userDB))
       } catch (error) {
         console.log(error)
       }
     },
     async cargarLocalStorage({ commit, state }) {
+      if (localStorage.getItem('user')) {
+        commit('setUser', JSON.parse(localStorage.getItem('user')))
+      }else{
+        return commit('setUser', null)
+      }
       try {
         const response = await fetch(`https://vue-udemy-course-81e54-default-rtdb.firebaseio.com/tareas/${state.user.localId}.json?auth=${state.user.idToken}`)
         const dataDB = await response.json()
@@ -90,24 +102,9 @@ export default createStore({
         for (let key in dataDB) {
           tareas.push(dataDB[key])
         }
+        commit('cargar', tareas)
       } catch (error) {
         console.log(error)
-      }
-    },
-
-    async getswsat({commit}){
-      try {
-        const ressatws = await fetch(`https://api.sandbox.sat.ws/events`, {
-          method: 'GET',
-          mode: 'no-cors',
-          headers: {
-            'X-API-Key': '8176d00cb4dd543af1ea85780a2e80a8'
-          }          
-        })
-        const responsesatws = await ressatws.json()
-        console.log(responsesatws)
-      } catch (error) {
-        
       }
     },
     async setTareas({ commit, state }, tarea){
@@ -120,7 +117,7 @@ export default createStore({
           body: JSON.stringify(tarea)
         })
         const dataDB = await res.json()
-        console.log(dataDB)
+        // console.log(dataDB)
       } catch (error) {
         console.log(error)
       }
@@ -150,6 +147,11 @@ export default createStore({
       } catch (error) {
         console.log(error)
       }
+    }
+  },
+  getters:{
+    usuarioAutenticado(state){
+      return !!state.user
     }
   },
   modules: {
