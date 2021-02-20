@@ -11,9 +11,30 @@ export default createStore({
       estado: '',
       numero: 0
     },
-    user: null
+    user: null,
+    error: { 
+      tipo: null,
+      mensaje: null
+    }
   },
   mutations: {
+    setError(state, payload){
+      if(payload === null){
+        return state.error = { tipo: null, mensaje: null}
+      }
+      if(payload === "EMAIL_NOT_FOUND"){
+        return state.error = { tipo: 'email', mensaje: 'Email no registrado'}
+      }
+      if(payload === "INVALID_PASSWORD"){
+        return state.error = {tipo: 'pass',mensaje: 'Contraseña incorrecta'}
+      }
+      if(payload === "EMAIL_EXISTS"){
+        return state.error = {tipo: 'email',mensaje: 'Email ya registrado'}
+      }
+      if(payload === "INVALID_EMAIL"){
+        return state.error = {tipo: 'email',mensaje: 'Email Invalido'}
+      }
+    },
     setUser(state, payload){
       state.user = payload
     },
@@ -56,11 +77,12 @@ export default createStore({
         })
         const userDB = await res.json()
         if (userDB.error) {
-          return console.log('usuario con error')
+          // console.log(userDB.error)
+          return commit('setError', userDB.error.message)
         }
-        // console.log(userDB)
         commit('setUser', userDB)
         router.push('/')
+        commit('setError', null)
         localStorage.setItem('user', JSON.stringify(userDB))
       } catch (error) {
         
@@ -78,12 +100,13 @@ export default createStore({
           body: JSON.stringify(user)
         })
         const userDB = await res.json()
-        console.log(userDB)
         if (userDB.error) {
-          return
+          console.log(userDB.error)
+          return commit('setError', userDB.error.message)
         }
         commit('setUser', userDB)
         router.push('/ingreso')
+        commit('setError', null)
         localStorage.setItem('user', JSON.stringify(userDB))
       } catch (error) {
         console.log(error)
